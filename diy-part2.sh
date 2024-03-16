@@ -11,12 +11,12 @@
 #
 
 # RM feeds
-rm -rf feeds/luci/applications/luci-app-passwall
-rm -rf feeds/luci/applications/luci-app-ddns-go
+#rm -rf feeds/luci/applications/luci-app-passwall
+#rm -rf feeds/luci/applications/luci-app-ddns-go
 rm -rf feeds/luci/applications/luci-app-dockerman
 
 ./scripts/feeds update -a
 
 # update go lang
-rm -rf feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang
+#rm -rf feeds/packages/lang/golang
+#git clone https://github.com/sbwml/packages_lang_golang -b 22.x feeds/packages/lang/golang

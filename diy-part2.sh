@@ -15,6 +15,4 @@ rm -rf feeds/luci/applications/luci-app-passwall
 rm -rf feeds/luci/applications/luci-app-ddns-go
 rm -rf feeds/luci/applications/luci-app-dockerman
 
-# clean feeds
-./scripts/feeds clean
 ./scripts/feeds update -a

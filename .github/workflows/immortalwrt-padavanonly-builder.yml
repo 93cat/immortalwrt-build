@@ -10,17 +10,17 @@
 # See /LICENSE for more information.
 #
 
-name: immortalwrt-padavanonly-builder
+name: immortalwrt-stable-builder
 
 on:
   repository_dispatch:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/93cat/immortalwrt-mt798x-pd
+  REPO_URL: https://github.com/93cat/immortalwrt-XDR6088-21.02.git
   REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: 6088-pd.config
+  CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   DIY_P3_SH: diy-part3.sh

@@ -29,9 +29,7 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "console=ttyS0,115200n1 loglevel=8  \
-			      earlycon=uart8250,mmio32,0x11002000 \
-			      root=PARTLABEL=rootfs rootwait";
+		bootargs = "console=ttyS0,115200n1 loglevel=8 earlycon=uart8250,mmio32,0x11002000 root=PARTLABEL=rootfs rootwait";
 	};
 
 	keys {
@@ -270,30 +268,4 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 					reg = <6>;
 					label = "cpu";
 					ethernet = <&gmac0>;
-					phy-mode = "2500base-x";
-
-					fixed-link {
-						speed = <2500>;
-						full-duplex;
-						pause;
-					};
-				};
-			};
-		};
-	};
-};
-EOF
-
-# 2. 将设备配置追加到对应的 mk 文件 (支持 6.6 内核结构)
-cat << 'EOF' >> target/linux/mediatek/image/filogic.mk
-
-define Device/clx_s20m
-  DEVICE_VENDOR := CLX
-  DEVICE_MODEL := S20M
-  DEVICE_DTS := mt7986a-clx-s20m
-  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
-endef
-TARGET_DEVICES += clx_s20m
-EOF
-
-echo "CLX S20M 适配代码注入完成！"
+					phy-mode = "25

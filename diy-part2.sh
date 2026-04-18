@@ -3,7 +3,7 @@
 # OpenWrt DIY script part 2 (After Update feeds)
 #
 
-echo "开始注入 CLX S20M 设备适配代码 (适配 Linux 6.6 内核)..."
+echo "开始注入 CLX S20M 设备适配代码 (极致精简优化版)..."
 
 # 1. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件
 cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
@@ -88,11 +88,11 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 };
 
 &pio {
-	/* 开启 PCIe 的引脚复用 */
+	/* 优化：去除了冗余的 clk 和 wake，仅保留 pereset 避免 dmesg 警告 */
 	pcie_pins: pcie-pins {
 		mux {
 			function = "pcie";
-			groups = "pcie_clk", "pcie_wake", "pcie_pereset";
+			groups = "pcie_pereset";
 		};
 	};
 
@@ -155,7 +155,6 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 	};
 };
 
-/* 激活 PCIe 核心与物理层 */
 &pcie {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pcie_pins>;
@@ -206,12 +205,10 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 	status = "okay";
 };
 
-/* 明确关闭 WiFi */
 &wifi {
 	status = "disabled";
 };
 
-/* 仅保留核心 gmac0 和 MT7531 交换机，砍掉多余的 2.5G 外围网卡 */
 &eth {
 	status = "okay";
 
@@ -268,4 +265,37 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 					reg = <6>;
 					label = "cpu";
 					ethernet = <&gmac0>;
-					phy-mode = "25
+					phy-mode = "2500base-x";
+
+					fixed-link {
+						speed = <2500>;
+						full-duplex;
+						pause;
+					};
+				};
+			};
+		};
+	};
+};
+EOF
+
+# 2. 将设备配置追加到对应的 mk 文件 (带防重复检查)
+if ! grep -q "define Device/clx_s20m" target/linux/mediatek/image/filogic.mk; then
+cat << 'EOF' >> target/linux/mediatek/image/filogic.mk
+
+define Device/clx_s20m
+  DEVICE_VENDOR := CLX
+  DEVICE_MODEL := S20M
+  DEVICE_DTS := mt7986a-clx-s20m
+  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
+  IMAGES := sysupgrade.bin
+  IMAGE_SIZE := 2048m
+endef
+TARGET_DEVICES += clx_s20m
+EOF
+  echo "CLX S20M 适配代码追加成功！"
+else
+  echo "警告：检测到 filogic.mk 中已存在 CLX S20M 配置，跳过追加以防止重复。"
+fi
+
+echo "diy-part2.sh 执行完毕！祝编译顺利！"

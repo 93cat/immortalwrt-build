@@ -305,7 +305,7 @@ define Device/clx_s20m
   DEVICE_VENDOR := CLX
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
-  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk
+  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
 endef
 TARGET_DEVICES += clx_s20m
 EOF

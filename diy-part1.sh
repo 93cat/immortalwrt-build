@@ -23,4 +23,4 @@ echo 'src-git cloudflarespeedtest https://github.com/mingxiaoyu/luci-app-cloudfl
 # Add package
 git clone https://github.com/kiddin9/luci-theme-edge.git package/luci-theme-edge
 #git clone https://github.com/sirpdboy/luci-app-ddns-go.git package/ddns-go
-git clone https://github.com/lisaac/luci-app-dockerman.git package/luci-app-dockerman
+#git clone https://github.com/lisaac/luci-app-dockerman.git package/luci-app-dockerman

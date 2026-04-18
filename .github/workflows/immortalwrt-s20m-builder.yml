@@ -5,7 +5,7 @@ on:
 
 env:
   REPO_URL: https://github.com/93cat/immortalwrt-mt798x
-#  REPO_BRANCH: main
+  # 不再显式指定分支，让 git clone 自动使用默认分支（master）
   CONFIG_FILE: s20m.config
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
@@ -32,7 +32,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
 
     - name: Clone source code
-      run: git clone $REPO_URL -b $REPO_BRANCH immortalwrt
+      run: git clone $REPO_URL immortalwrt   # 不再指定 -b，自动克隆默认分支
 
     - name: Update feeds
       run: |

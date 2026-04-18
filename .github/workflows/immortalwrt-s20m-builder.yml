@@ -1,16 +1,9 @@
 name: Build ImmortalWrt (S20M)
 
-on:
-  repository_dispatch:
-  workflow_dispatch:
-    inputs:
-      ssh:
-        description: '是否通过 SSH 连接进行配置 (true/false)'
-        required: false
-        default: 'false'
-
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  # 这里已经修改为您自己的源码仓库地址
+  REPO_URL: https://github.com/93cat/immortalwrt
+  # 如果您的适配代码不在 master 分支（例如在 openwrt-23.05），请将此处修改为您对应的分支名
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: s20m.config
@@ -40,7 +33,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 克隆 ImmortalWrt 源码
+    - name: 克隆您的 ImmortalWrt 源码
       working-directory: /workdir
       run: |
         df -hT $PWD
@@ -100,10 +93,10 @@ jobs:
       id: tag
       if: steps.organize.outputs.status == 'success' && !cancelled()
       run: |
-        echo "release_tag=ImmortalWrt_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
-        echo "## ImmortalWrt 固件发布" >> release.txt
+        echo "release_tag=ImmortalWrt_S20M_$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        echo "## ImmortalWrt 固件发布 (S20M 定制版)" >> release.txt
         echo "编译设备: S20M" >> release.txt
-        echo "源码地址: $REPO_URL" >> release.txt
+        echo "源码仓库: $REPO_URL" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传固件到 Release

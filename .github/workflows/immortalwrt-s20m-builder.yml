@@ -1,9 +1,12 @@
 name: Build ImmortalWrt (S20M)
 
+on:
+  repository_dispatch:
+  workflow_dispatch:
+
 env:
-  # 这里已经修改为您自己的源码仓库地址
   REPO_URL: https://github.com/93cat/immortalwrt
-  # 如果您的适配代码不在 master 分支（例如在 openwrt-23.05），请将此处修改为您对应的分支名
+  # 如果您的适配代码不在 master 分支，请将此处修改为您对应的分支名
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: s20m.config

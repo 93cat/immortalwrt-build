@@ -5,7 +5,7 @@ on:
 
 env:
   REPO_URL: https://github.com/93cat/immortalwrt-mt798x
-  REPO_BRANCH: master
+  REPO_BRANCH: main
   CONFIG_FILE: s20m.config
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai

@@ -5,9 +5,6 @@ on:
 
 env:
   REPO_URL: https://github.com/93cat/immortalwrt-mt798x
-  # 不再显式指定分支，让 git clone 自动使用默认分支（master）
-  CONFIG_FILE: s20m.config
-  UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -32,7 +29,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
 
     - name: Clone source code
-      run: git clone $REPO_URL immortalwrt   # 不再指定 -b，自动克隆默认分支
+      run: git clone $REPO_URL immortalwrt
 
     - name: Update feeds
       run: |
@@ -40,8 +37,19 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Copy configuration
-      run: cp $CONFIG_FILE immortalwrt/.config
+    - name: Generate base config and enable device
+      working-directory: immortalwrt
+      run: |
+        # 生成默认配置
+        make defconfig
+        # 启用你的设备（假设设备定义名为 clx_s20m，属于 mediatek/filogic 目标）
+        ./scripts/config --enable TARGET_mediatek
+        ./scripts/config --enable TARGET_mediatek_filogic
+        ./scripts/config --enable TARGET_DEVICE_mediatek_filogic_DEVICE_clx_s20m
+        # 可选：添加常用软件包
+        ./scripts/config --enable CONFIG_PACKAGE_luci
+        # 重新生成配置以解决依赖
+        make defconfig
 
     - name: Download package sources
       working-directory: immortalwrt

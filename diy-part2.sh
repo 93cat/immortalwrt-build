@@ -200,7 +200,6 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 			function = "emmc";
 			groups = "emmc_51";
 		};
-
 		conf-cmd-dat {
 			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
 			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
@@ -209,18 +208,15 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 			drive-strength = <4>;
 			mediatek,pull-up-adv = <1>;
 		};
-
 		conf-clk {
 			pins = "EMMC_CK";
 			drive-strength = <6>;
 			mediatek,pull-down-adv = <2>;
 		};
-
 		conf-ds {
 			pins = "EMMC_DSL";
 			mediatek,pull-down-adv = <2>;
 		};
-
 		conf-rst {
 			pins = "EMMC_RSTB";
 			drive-strength = <4>;
@@ -233,7 +229,6 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 			function = "emmc";
 			groups = "emmc_51";
 		};
-
 		conf-cmd-dat {
 			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
 			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
@@ -242,26 +237,44 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 			drive-strength = <4>;
 			mediatek,pull-up-adv = <1>;
 		};
-
 		conf-clk {
 			pins = "EMMC_CK";
 			drive-strength = <6>;
 			mediatek,pull-down-adv = <2>;
 		};
-
 		conf-ds {
 			pins = "EMMC_DSL";
 			mediatek,pull-down-adv = <2>;
 		};
-
 		conf-rst {
 			pins = "EMMC_RSTB";
 			drive-strength = <4>;
 			mediatek,pull-up-adv = <1>;
 		};
 	};
+
+	/* [新增] PCIe 的引脚定义 */
+	pcie_pins: pcie-pins {
+		mux {
+			function = "pcie";
+			groups = "pcie_clk", "pcie_wake", "pcie_pereset";
+		};
+	};
 };
 
+/* [新增] 激活 PCIe MAC 接口 */
+&pcie {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pcie_pins>;
+	status = "okay";
+};
+
+/* [新增] 激活 PCIe PHY 物理层 */
+&pcie_phy {
+	status = "okay";
+};
+
+/* [确认] 彻底禁用 WiFi */
 &wifi {
 	status = "disabled";
 };

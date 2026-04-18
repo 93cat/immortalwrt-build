@@ -5,6 +5,8 @@ on:
 
 env:
   REPO_URL: https://github.com/93cat/immortalwrt-mt798x
+  REPO_BRANCH: master
+  DIFFCONFIG_FILE: s20m.diffconfig
   TZ: Asia/Shanghai
 
 jobs:
@@ -29,7 +31,7 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
 
     - name: Clone source code
-      run: git clone $REPO_URL immortalwrt
+      run: git clone $REPO_URL -b $REPO_BRANCH immortalwrt
 
     - name: Update feeds
       run: |
@@ -37,18 +39,14 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Generate base config and enable device
+    - name: Apply diffconfig and generate full config
       working-directory: immortalwrt
       run: |
         # 生成默认配置
         make defconfig
-        # 启用你的设备（假设设备定义名为 clx_s20m，属于 mediatek/filogic 目标）
-        ./scripts/config --enable TARGET_mediatek
-        ./scripts/config --enable TARGET_mediatek_filogic
-        ./scripts/config --enable TARGET_DEVICE_mediatek_filogic_DEVICE_clx_s20m
-        # 可选：添加常用软件包
-        ./scripts/config --enable CONFIG_PACKAGE_luci
-        # 重新生成配置以解决依赖
+        # 应用差异配置（只包含与默认不同的选项）
+        cat $GITHUB_WORKSPACE/$DIFFCONFIG_FILE >> .config
+        # 更新配置，自动解决依赖
         make defconfig
 
     - name: Download package sources
@@ -57,7 +55,8 @@ jobs:
 
     - name: Compile firmware
       working-directory: immortalwrt
-      run: make -j$(nproc) || make -j1 V=s
+      run: |
+        make -j$(nproc) || (make -j1 V=s && exit 1)
 
     - name: Rename firmware with date
       run: |

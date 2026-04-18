@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/93cat/immortalwrt
-  # 如果您的适配代码不在 master 分支，请将此处修改为您对应的分支名
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  # 官方常用的分支是 master 或 openwrt-23.05，请根据您的配置选择
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: s20m.config

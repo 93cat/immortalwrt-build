@@ -17,10 +17,17 @@
 #echo 'src-git helloworld https://github.com/fw876/helloworld' >>feeds.conf.default
 echo 'src-git cdnspeedtest https://github.com/immortalwrt-collections/openwrt-cdnspeedtest.git' >>feeds.conf.default
 echo 'src-git cloudflarespeedtest https://github.com/mingxiaoyu/luci-app-cloudflarespeedtest.git' >>feeds.conf.default
+sed -i '1i src-git lucky https://github.com/sirpdboy/luci-app-lucky.git;main' feeds.conf.default
 #echo 'src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;main' >>feeds.conf.default
 #echo 'src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main' >>feeds.conf.default
 
 # Add package
 git clone https://github.com/kiddin9/luci-theme-edge.git package/luci-theme-edge
-#git clone https://github.com/sirpdboy/luci-app-ddns-go.git package/ddns-go
-#git clone https://github.com/lisaac/luci-app-dockerman.git package/luci-app-dockerman
+
+echo "开始添加最新版 Passwall 官方源码 feeds..."
+
+# 将最新版 Passwall 源码追加到 feeds.conf.default 末尾
+echo "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main" >> feeds.conf.default
+echo "src-git passwall_luci https://github.com/Openwrt-Passwall/openwrt-passwall.git;main" >> feeds.conf.default
+
+echo "Passwall feeds 添加完成！"

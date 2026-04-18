@@ -3,6 +3,26 @@
 # OpenWrt DIY script part 2 (After Update feeds)
 #
 
+echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
+
+# =========================================================
+# 1. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！
+# =========================================================
+echo "正在清理官方 feeds 中的旧版 Passwall 依赖..."
+rm -rf feeds/luci/applications/luci-app-passwall
+rm -rf feeds/packages/net/passwall
+rm -rf feeds/packages/net/haproxy
+rm -rf feeds/packages/net/xray-core
+rm -rf feeds/packages/net/xray-plugin
+rm -rf feeds/packages/net/sing-box
+
+# =========================================================
+# 2. 从官方最新仓库拉取代码到最高优先级的 package/ 目录
+# =========================================================
+echo "正在拉取最新版 Passwall 源码..."
+git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git package/openwrt-passwall-packages
+git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall.git package/openwrt-passwall
+
 echo "开始注入 CLX S20M 设备适配代码 (极致精简优化版)..."
 
 # 1. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件

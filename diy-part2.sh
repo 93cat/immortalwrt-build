@@ -36,14 +36,14 @@ git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall.git pac
 
 # =========================================================
 # 4. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件
-#    (双重保险：注入内核源码树 + 传统 dts 目录)
+#    (采用最严谨的 files-6.6 版本专属目录注入 + 传统目录双备份机制)
 # =========================================================
-echo "正在注入 S20M 设备树文件..."
+echo "正在注入 S20M 设备树文件 (files-6.6 机制)..."
 
-mkdir -p target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/
+mkdir -p target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/
 mkdir -p target/linux/mediatek/dts/
 
-cat << 'EOF' > target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts
+cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts
 /dts-v1/;
 #include "mt7986a.dtsi"
 #include <dt-bindings/gpio/gpio.h>
@@ -180,8 +180,8 @@ cat << 'EOF' > target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/mt7986a-
 };
 EOF
 
-# 同步复制一份到传统目录，防止 Makefile 回退寻找
-cp target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts target/linux/mediatek/dts/mt7986a-clx-s20m.dts
+# 同步复制一份到传统目录，防止 Makefile 降级寻找
+cp target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
 # 2. 将设备配置追加到对应的 mk 文件 (带防重复检查)
 if ! grep -q "define Device/clx_s20m" target/linux/mediatek/image/filogic.mk; then

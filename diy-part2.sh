@@ -192,8 +192,7 @@ define Device/clx_s20m
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
-  IMAGES := sysupgrade.bin
-  IMAGE_SIZE := 2048m
+  IMAGES := sysupgrade.itb
 endef
 TARGET_DEVICES += clx_s20m
 EOF

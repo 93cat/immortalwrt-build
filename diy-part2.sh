@@ -191,11 +191,11 @@ define Device/clx_s20m
   DEVICE_VENDOR := CLX
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
+  DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
   IMAGES := sysupgrade.itb
 endef
 TARGET_DEVICES += clx_s20m
-EOF
   echo "CLX S20M 适配代码追加成功！"
 else
   echo "警告：检测到 filogic.mk 中已存在 CLX S20M 配置，跳过追加以防止重复。"

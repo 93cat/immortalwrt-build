@@ -6,10 +6,11 @@
 echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 
 # =========================================================
-# 0. 修复 ImmortalWrt 24.10 上游昨天的 Typo Bug
+# 0. 升级 Golang 到 1.25.x (适配最新 Sing-box)
 # =========================================================
-#echo "正在修复上游 zbtlink 设备的拼写错误..."
-#sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
+echo "正在抹除旧版 Golang 并注入 Go 1.25.x 环境..."
+rm -rf feeds/packages/lang/golang
+git clone https://github.com/kenzok8/golang -b 1.25 feeds/packages/lang/golang
 
 # =========================================================
 # 1. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！

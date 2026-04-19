@@ -10,14 +10,14 @@ echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
 
 # =========================================================
-# 0. 升级 Golang 到 1.25.x (适配最新 Sing-box)
+# 1. 升级 Golang 到 1.25.x (适配最新 Sing-box)
 # =========================================================
 echo "正在抹除旧版 Golang 并注入 Go 1.25.x 环境..."
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/kenzok8/golang -b 1.25 feeds/packages/lang/golang
 
 # =========================================================
-# 1. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！
+# 2. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！
 # =========================================================
 echo "正在清理官方 feeds 中的旧版 Passwall 依赖..."
 rm -rf feeds/luci/applications/luci-app-passwall
@@ -28,18 +28,22 @@ rm -rf feeds/packages/net/xray-plugin
 rm -rf feeds/packages/net/sing-box
 
 # =========================================================
-# 2. 从官方最新仓库拉取代码到最高优先级的 package/ 目录
+# 3. 从官方最新仓库拉取代码到最高优先级的 package/ 目录
 # =========================================================
 echo "正在拉取最新版 Passwall 源码..."
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git package/openwrt-passwall-packages
 git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall.git package/openwrt-passwall
 
-echo "开始注入 CLX S20M 设备适配代码 (极致精简优化版)..."
+# =========================================================
+# 4. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件
+#    (双重保险：注入内核源码树 + 传统 dts 目录)
+# =========================================================
+echo "正在注入 S20M 设备树文件..."
 
-# 1. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件
-cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
-// SPDX-License-Identifier: (GPL-2.0-only OR MIT)
+mkdir -p target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/
+mkdir -p target/linux/mediatek/dts/
 
+cat << 'EOF' > target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts
 /dts-v1/;
 #include "mt7986a.dtsi"
 #include <dt-bindings/gpio/gpio.h>
@@ -65,7 +69,6 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
 	keys {
 		compatible = "gpio-keys";
-
 		button-reset {
 			label = "reset";
 			linux,code = <KEY_RESTART>;
@@ -75,7 +78,6 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
 	leds {
 		compatible = "gpio-leds";
-
 		led_system: system {
 			label = "blue:system";
 			color = <LED_COLOR_ID_BLUE>;
@@ -114,75 +116,11 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 	};
 };
 
-&crypto {
-	status = "okay";
-};
+&crypto { status = "okay"; };
 
 &pio {
-	/* 优化：去除了冗余的 clk 和 wake，仅保留 pereset 避免 dmesg 警告 */
 	pcie_pins: pcie-pins {
-		mux {
-			function = "pcie";
-			groups = "pcie_pereset";
-		};
-	};
-
-	mmc0_pins_default: mmc0-pins-default {
-		mux {
-			function = "emmc";
-			groups = "emmc_51";
-		};
-		conf-cmd-dat {
-			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
-			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
-			       "EMMC_DATA_6", "EMMC_DATA_7", "EMMC_CMD";
-			input-enable;
-			drive-strength = <4>;
-			mediatek,pull-up-adv = <1>;
-		};
-		conf-clk {
-			pins = "EMMC_CK";
-			drive-strength = <6>;
-			mediatek,pull-down-adv = <2>;
-		};
-		conf-ds {
-			pins = "EMMC_DSL";
-			mediatek,pull-down-adv = <2>;
-		};
-		conf-rst {
-			pins = "EMMC_RSTB";
-			drive-strength = <4>;
-			mediatek,pull-up-adv = <1>;
-		};
-	};
-
-	mmc0_pins_uhs: mmc0-pins-uhs {
-		mux {
-			function = "emmc";
-			groups = "emmc_51";
-		};
-		conf-cmd-dat {
-			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
-			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
-			       "EMMC_DATA_6", "EMMC_DATA_7", "EMMC_CMD";
-			input-enable;
-			drive-strength = <4>;
-			mediatek,pull-up-adv = <1>;
-		};
-		conf-clk {
-			pins = "EMMC_CK";
-			drive-strength = <6>;
-			mediatek,pull-down-adv = <2>;
-		};
-		conf-ds {
-			pins = "EMMC_DSL";
-			mediatek,pull-down-adv = <2>;
-		};
-		conf-rst {
-			pins = "EMMC_RSTB";
-			drive-strength = <4>;
-			mediatek,pull-up-adv = <1>;
-		};
+		mux { function = "pcie"; groups = "pcie_pereset"; };
 	};
 };
 
@@ -192,35 +130,9 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 	status = "okay";
 };
 
-&pcie_phy {
-	status = "okay";
-};
-
-&mmc0 {
-	pinctrl-names = "default", "state_uhs";
-	pinctrl-0 = <&mmc0_pins_default>;
-	pinctrl-1 = <&mmc0_pins_uhs>;
-	bus-width = <8>;
-	max-frequency = <200000000>;
-	cap-mmc-highspeed;
-	mmc-hs200-1_8v;
-	mmc-hs400-1_8v;
-	hs400-ds-delay = <0x14014>;
-	vmmc-supply = <&reg_3p3v>;
-	vqmmc-supply = <&reg_1p8v>;
-	non-removable;
-	no-sd;
-	no-sdio;
-	status = "okay";
-};
-
-&uart0 {
-	status = "okay";
-};
-
-&usb_phy {
-	status = "okay";
-};
+&pcie_phy { status = "okay"; };
+&uart0 { status = "okay"; };
+&usb_phy { status = "okay"; };
 
 &ssusb {
 	vusb33-supply = <&reg_3p3v>;
@@ -228,37 +140,19 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 	status = "okay";
 };
 
-&watchdog {
-	status = "okay";
-};
-
-&trng {
-	status = "okay";
-};
-
-&wifi {
-	status = "disabled";
-};
+&wifi { status = "disabled"; };
 
 &eth {
 	status = "okay";
-
 	gmac0: mac@0 {
 		compatible = "mediatek,eth-mac";
 		reg = <0>;
 		phy-mode = "2500base-x";
-
-		fixed-link {
-			speed = <2500>;
-			full-duplex;
-			pause;
-		};
+		fixed-link { speed = <2500>; full-duplex; pause; };
 	};
-
 	mdio: mdio-bus {
 		#address-cells = <1>;
 		#size-cells = <0>;
-
 		switch@31 {
 			compatible = "mediatek,mt7531";
 			reg = <31>;
@@ -267,48 +161,27 @@ cat << 'EOF' > target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 			#interrupt-cells = <1>;
 			interrupt-parent = <&pio>;
 			interrupts = <66 IRQ_TYPE_LEVEL_HIGH>;
-
 			ports {
 				#address-cells = <1>;
 				#size-cells = <0>;
-
-				port@0 {
-					reg = <0>;
-					label = "wan";
-				};
-				port@1 {
-					reg = <1>;
-					label = "lan4";
-				};
-				port@2 {
-					reg = <2>;
-					label = "lan3";
-				};
-				port@3 {
-					reg = <3>;
-					label = "lan2";
-				};
-				port@4 {
-					reg = <4>;
-					label = "lan1";
-				};
+				port@0 { reg = <0>; label = "wan"; };
+				port@1 { reg = <1>; label = "lan4"; };
+				port@2 { reg = <2>; label = "lan3"; };
+				port@3 { reg = <3>; label = "lan2"; };
+				port@4 { reg = <4>; label = "lan1"; };
 				port@6 {
-					reg = <6>;
-					label = "cpu";
-					ethernet = <&gmac0>;
+					reg = <6>; label = "cpu"; ethernet = <&gmac0>;
 					phy-mode = "2500base-x";
-
-					fixed-link {
-						speed = <2500>;
-						full-duplex;
-						pause;
-					};
+					fixed-link { speed = <2500>; full-duplex; pause; };
 				};
 			};
 		};
 	};
 };
 EOF
+
+# 同步复制一份到传统目录，防止 Makefile 回退寻找
+cp target/linux/mediatek/files/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
 # 2. 将设备配置追加到对应的 mk 文件 (带防重复检查)
 if ! grep -q "define Device/clx_s20m" target/linux/mediatek/image/filogic.mk; then

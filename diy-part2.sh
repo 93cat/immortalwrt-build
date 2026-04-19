@@ -8,8 +8,8 @@ echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 # =========================================================
 # 0. 修复 ImmortalWrt 24.10 上游昨天的 Typo Bug
 # =========================================================
-echo "正在修复上游 zbtlink 设备的拼写错误..."
-sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
+#echo "正在修复上游 zbtlink 设备的拼写错误..."
+#sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
 
 # =========================================================
 # 1. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！

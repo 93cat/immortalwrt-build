@@ -183,7 +183,9 @@ EOF
 # 同步复制一份到传统目录，防止 Makefile 降级寻找
 cp target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts target/linux/mediatek/dts/mt7986a-clx-s20m.dts
 
-# 2. 将设备配置追加到对应的 mk 文件 (带防重复检查)
+# =========================================================
+# 5. 将设备配置追加到对应的 mk 文件 (带防重复检查)
+# =========================================================
 if ! grep -q "define Device/clx_s20m" target/linux/mediatek/image/filogic.mk; then
 cat << 'EOF' >> target/linux/mediatek/image/filogic.mk
 
@@ -196,6 +198,7 @@ define Device/clx_s20m
   IMAGES := sysupgrade.itb
 endef
 TARGET_DEVICES += clx_s20m
+EOF
   echo "CLX S20M 适配代码追加成功！"
 else
   echo "警告：检测到 filogic.mk 中已存在 CLX S20M 配置，跳过追加以防止重复。"

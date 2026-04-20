@@ -119,6 +119,7 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 
 &crypto { status = "okay"; };
 &trng { status = "okay"; };
+&watchdog { status = "okay"; };
 
 &pio {
 	pcie_pins: pcie-pins {

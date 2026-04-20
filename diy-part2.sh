@@ -37,7 +37,7 @@ git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall.git pac
 
 # =========================================================
 # 4. 生成基于 6.6 内核规范的 mt7986a-clx-s20m.dts 文件
-#    (采用最严谨的 files-6.6 版本专属目录注入 + 传统目录双备份机制)
+#    (采用最严谨的 files-6.6 机制，包含全套硬件加速节点)
 # =========================================================
 echo "正在注入 S20M 设备树文件 (files-6.6 机制)..."
 
@@ -154,21 +154,21 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 		fixed-link { speed = <2500>; full-duplex; pause; };
 	};
 	mdio: mdio-bus {
-		#address-cells = ;
+		#address-cells = <1>;
 		#size-cells = <0>;
 		switch@31 {
 			compatible = "mediatek,mt7531";
 			reg = <31>;
 			reset-gpios = <&pio 5 GPIO_ACTIVE_HIGH>;
 			interrupt-controller;
-			#interrupt-cells = ;
+			#interrupt-cells = <1>;
 			interrupt-parent = <&pio>;
 			interrupts = <66 IRQ_TYPE_LEVEL_HIGH>;
 			ports {
-				#address-cells = ;
+				#address-cells = <1>;
 				#size-cells = <0>;
 				port@0 { reg = <0>; label = "wan"; };
-				port@1 { reg = ; label = "lan4"; };
+				port@1 { reg = <1>; label = "lan4"; };
 				port@2 { reg = <2>; label = "lan3"; };
 				port@3 { reg = <3>; label = "lan2"; };
 				port@4 { reg = <4>; label = "lan1"; };
@@ -197,7 +197,7 @@ define Device/clx_s20m
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme
+  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme kmod-crypto-hw-safexcel block-mount automount kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3 zram-swap
   IMAGES := sysupgrade.itb
 endef
 TARGET_DEVICES += clx_s20m

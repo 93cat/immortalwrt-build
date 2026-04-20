@@ -5,6 +5,7 @@
 
 echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 
+# =========================================================
 # 0. 修复 ImmortalWrt 24.10 上游昨天的 Typo Bug
 # =========================================================
 sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
@@ -151,21 +152,21 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 		fixed-link { speed = <2500>; full-duplex; pause; };
 	};
 	mdio: mdio-bus {
-		#address-cells = <1>;
+		#address-cells = ;
 		#size-cells = <0>;
 		switch@31 {
 			compatible = "mediatek,mt7531";
 			reg = <31>;
 			reset-gpios = <&pio 5 GPIO_ACTIVE_HIGH>;
 			interrupt-controller;
-			#interrupt-cells = <1>;
+			#interrupt-cells = ;
 			interrupt-parent = <&pio>;
 			interrupts = <66 IRQ_TYPE_LEVEL_HIGH>;
 			ports {
-				#address-cells = <1>;
+				#address-cells = ;
 				#size-cells = <0>;
 				port@0 { reg = <0>; label = "wan"; };
-				port@1 { reg = <1>; label = "lan4"; };
+				port@1 { reg = ; label = "lan4"; };
 				port@2 { reg = <2>; label = "lan3"; };
 				port@3 { reg = <3>; label = "lan2"; };
 				port@4 { reg = <4>; label = "lan1"; };

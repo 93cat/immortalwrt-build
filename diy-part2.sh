@@ -431,4 +431,51 @@ else
     echo "警告：.config 文件不存在，跳过 WiFi 包移除配置。"
 fi
 
+# =========================================================
+# 1. 彻底移除 WiFi 相关源码及配置（适用于纯有线网关）
+# =========================================================
+echo "正在移除 WiFi 相关源码和配置..."
+
+# 删除 WiFi 驱动及工具源码（防止被编译）
+rm -rf package/kernel/mt76
+rm -rf package/kernel/mt_wifi
+rm -rf package/network/services/hostapd
+rm -rf package/network/utils/iw
+rm -rf package/network/utils/wireless-tools
+rm -rf package/network/config/wifi-scripts
+rm -rf package/network/utils/iwinfo
+
+# 清理 .config 中所有 WiFi 相关配置项（包括依赖）
+sed -i '/CONFIG_PACKAGE_kmod-mt76/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-mt7915/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-mt7986/d' .config
+sed -i '/CONFIG_PACKAGE_mt76/d' .config
+sed -i '/CONFIG_PACKAGE_mt_wifi/d' .config
+sed -i '/CONFIG_PACKAGE_wpad/d' .config
+sed -i '/CONFIG_PACKAGE_hostapd/d' .config
+sed -i '/CONFIG_PACKAGE_iw/d' .config
+sed -i '/CONFIG_PACKAGE_wireless-tools/d' .config
+sed -i '/CONFIG_PACKAGE_wifi-scripts/d' .config
+sed -i '/CONFIG_PACKAGE_iwinfo/d' .config
+sed -i '/CONFIG_MTK_MT_WIFI/d' .config
+sed -i '/CONFIG_MTK_WARP/d' .config
+
+# =========================================================
+# 2. 关闭内核调试选项（减小体积，提升性能）
+# =========================================================
+echo "正在关闭内核调试选项..."
+sed -i 's/^CONFIG_KERNEL_DEBUG_KERNEL=y/# CONFIG_KERNEL_DEBUG_KERNEL is not set/' .config
+sed -i 's/^CONFIG_KERNEL_DEBUG_INFO=y/# CONFIG_KERNEL_DEBUG_INFO is not set/' .config
+sed -i 's/^CONFIG_KERNEL_DEBUG_INFO_REDUCED=y/# CONFIG_KERNEL_DEBUG_INFO_REDUCED is not set/' .config
+sed -i 's/^CONFIG_KERNEL_DEBUG_FS=y/# CONFIG_KERNEL_DEBUG_FS is not set/' .config
+sed -i 's/^CONFIG_KERNEL_MAGIC_SYSRQ=y/# CONFIG_KERNEL_MAGIC_SYSRQ is not set/' .config
+
+# =========================================================
+# 3. 重新生成完整配置（重要！）
+# =========================================================
+echo "正在重新生成配置（make defconfig）..."
+make defconfig
+
+echo "所有自定义配置已完成，WiFi 已移除，内核调试已关闭。"
+
 echo "diy-part2.sh 执行完毕！祝编译顺利！"

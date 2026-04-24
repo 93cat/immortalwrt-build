@@ -400,7 +400,7 @@ define Device/clx_s20m
     kmod-nvme \
     kmod-crypto-mtk \
     block-mount automount \
-    kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3
+    kmod-fs-ext4 kmod-fs-exfat kmod-fs-ntfs3 kmod-fs-f2fs f2fs-tools
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += clx_s20m
@@ -430,5 +430,34 @@ if [ -f .config ]; then
 else
     echo "警告：.config 文件不存在，跳过 WiFi 包移除配置。"
 fi
+
+# =========================================================
+# 6. 预置 fstab 配置，强制 rootfs_data 使用 F2FS
+# =========================================================
+echo "创建预置的 fstab 配置..."
+
+# 创建目录（如果不存在）
+mkdir -p package/base-files/files/etc/config
+
+# 写入默认 fstab，指定 overlay 分区为 f2fs
+cat << 'EOF' > package/base-files/files/etc/config/fstab
+config global
+        option anon_swap '0'
+        option anon_mount '1'
+        option auto_swap '0'
+        option auto_mount '1'
+        option delay_root '5'
+        option check_fs '0'
+
+config mount
+        option target '/overlay'
+        option device '/dev/mmcblk0p5'   # ⚠️ 请根据实际分区号修改
+        option fstype 'f2fs'
+        option options 'rw,noatime,discard'
+        option enabled '1'
+        option enabled_fsck '0'
+EOF
+
+echo "fstab 配置已添加，请确认分区号（当前为 /dev/mmcblk0p5）是否正确。"
 
 echo "diy-part2.sh 执行完毕！祝编译顺利！"

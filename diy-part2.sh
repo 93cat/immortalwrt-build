@@ -6,11 +6,6 @@
 echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 
 # =========================================================
-# 0. 修复 ImmortalWrt 24.10 上游昨天的 Typo Bug
-# =========================================================
-sed -i 's/mt7981b.dtsi/mt7981.dtsi/g' target/linux/mediatek/dts/mt7981b-zbtlink*.dtsi 2>/dev/null || true
-
-# =========================================================
 # 1. 升级 Golang 到 1.25.x (适配最新 Sing-box)
 # =========================================================
 echo "正在抹除旧版 Golang 并注入 Go 1.25.x 环境..."
@@ -45,11 +40,14 @@ mkdir -p target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/
 mkdir -p target/linux/mediatek/dts/
 
 cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt7986a-clx-s20m.dts
+// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
+
 /dts-v1/;
-#include "mt7986a.dtsi"
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/input/input.h>
 #include <dt-bindings/leds/common.h>
+
+#include "mt7986a.dtsi"
 
 / {
 	model = "CLX S20M";
@@ -57,19 +55,24 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 
 	aliases {
 		serial0 = &uart0;
-		led-boot = &led_system;
-		led-failsafe = &led_system;
-		led-running = &led_system;
-		led-upgrade = &led_system;
+		led-boot = &sys_led;
+		led-failsafe = &sys_led;
+		led-running = &sys_led;
+		led-upgrade = &sys_led;
 	};
 
 	chosen {
 		stdout-path = "serial0:115200n8";
-		bootargs = "console=ttyS0,115200n1 loglevel=8 earlycon=uart8250,mmio32,0x11002000 root=PARTLABEL=rootfs rootwait";
+		bootargs-append = " root=PARTLABEL=rootfs rootwait rootfstype=squashfs,f2fs";
 	};
 
-	keys {
+	memory {
+		reg = <0 0x40000000 0 0x80000000>;
+	};
+
+	gpio-keys {
 		compatible = "gpio-keys";
+
 		button-reset {
 			label = "reset";
 			linux,code = <KEY_RESTART>;
@@ -77,14 +80,13 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 		};
 	};
 
-	leds {
+	gpio-leds {
 		compatible = "gpio-leds";
-		led_system: system {
-			label = "blue:system";
+
+		sys_led: sys-led {
 			color = <LED_COLOR_ID_BLUE>;
 			function = LED_FUNCTION_STATUS;
 			gpios = <&pio 22 GPIO_ACTIVE_LOW>;
-			default-state = "on";
 		};
 	};
 
@@ -111,20 +113,237 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 		regulator-name = "usb_vbus";
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
-		gpios = <&pio 24 GPIO_ACTIVE_HIGH>;
+		gpios = <&pio 17 GPIO_ACTIVE_HIGH>;
 		enable-active-high;
 		regulator-boot-on;
 	};
 };
 
-&crypto { status = "okay"; };
-&trng { status = "okay"; };
-&watchdog { status = "okay"; };
+&eth {
+	status = "okay";
+
+	gmac0: mac@0 {
+		compatible = "mediatek,eth-mac";
+		reg = <0>;
+		phy-mode = "2500base-x";
+		nvmem-cells = <&macaddr_factory_2a 0>;
+		nvmem-cell-names = "mac-address";
+
+		fixed-link {
+			speed = <2500>;
+			full-duplex;
+			pause;
+		};
+	};
+
+	mdio: mdio-bus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		switch: switch@1f {
+			compatible = "mediatek,mt7531";
+			reg = <31>;
+			reset-gpios = <&pio 5 GPIO_ACTIVE_HIGH>;
+			interrupt-controller;
+			#interrupt-cells = <1>;
+			interrupt-parent = <&pio>;
+			interrupts = <66 IRQ_TYPE_LEVEL_HIGH>;
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+					label = "wan";
+
+					nvmem-cells = <&macaddr_factory_24 0>;
+					nvmem-cell-names = "mac-address";
+				};
+
+				port@1 {
+					reg = <1>;
+					label = "lan4";
+				};
+
+				port@2 {
+					reg = <2>;
+					label = "lan3";
+				};
+
+				port@3 {
+					reg = <3>;
+					label = "lan2";
+				};
+
+				port@4 {
+					reg = <4>;
+					label = "lan1";
+				};
+
+				port@6 {
+					reg = <6>;
+					label = "cpu";
+					ethernet = <&gmac0>;
+					phy-mode = "2500base-x";
+
+					fixed-link {
+						speed = <2500>;
+						full-duplex;
+						pause;
+					};
+				};
+			};
+		};
+	};
+};
+
+&mmc0 {
+	pinctrl-names = "default", "state_uhs";
+	pinctrl-0 = <&mmc0_pins_default>;
+	pinctrl-1 = <&mmc0_pins_uhs>;
+	bus-width = <8>;
+	max-frequency = <200000000>;
+	cap-mmc-highspeed;
+	mmc-hs200-1_8v;
+	mmc-hs400-1_8v;
+	hs400-ds-delay = <0x14014>;
+	vmmc-supply = <&reg_3p3v>;
+	vqmmc-supply = <&reg_1p8v>;
+	non-removable;
+	no-sd;
+	no-sdio;
+	status = "okay";
+
+	card@0 {
+		compatible = "mmc-card";
+		reg = <0>;
+
+		block {
+			compatible = "block-device";
+
+			partitions {
+				block-partition-factory {
+					partname = "factory";
+
+					nvmem-layout {
+						compatible = "fixed-layout";
+						#address-cells = <1>;
+						#size-cells = <1>;
+
+						eeprom_factory_0: eeprom@0 {
+							reg = <0x0 0x1000>;
+						};
+
+						macaddr_factory_4: macaddr@4 {
+							compatible = "mac-base";
+							reg = <0x4 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+
+						macaddr_factory_24: macaddr@24 {
+							compatible = "mac-base";
+							reg = <0x24 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+
+						macaddr_factory_2a: macaddr@2a {
+							compatible = "mac-base";
+							reg = <0x2a 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+
+						macaddr_factory_30: macaddr@30 {
+							compatible = "mac-base";
+							reg = <0x30 0x6>;
+							#nvmem-cell-cells = <1>;
+						};
+					};
+				};
+			};
+		};
+	};
+};
 
 &pio {
-	pcie_pins: pcie-pins {
-		mux { function = "pcie"; groups = "pcie_pereset"; };
+	mmc0_pins_default: mmc0-pins {
+		mux {
+			function = "emmc";
+			groups = "emmc_51";
+		};
+
+		conf-cmd-dat {
+			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
+			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
+			       "EMMC_DATA_6", "EMMC_DATA_7", "EMMC_CMD";
+			input-enable;
+			drive-strength = <4>;
+			mediatek,pull-up-adv = <1>;	/* pull-up 10K */
+		};
+
+		conf-clk {
+			pins = "EMMC_CK";
+			drive-strength = <6>;
+			mediatek,pull-down-adv = <2>;	/* pull-down 50K */
+		};
+
+		conf-ds {
+			pins = "EMMC_DSL";
+			mediatek,pull-down-adv = <2>;	/* pull-down 50K */
+		};
+
+		conf-rst {
+			pins = "EMMC_RSTB";
+			drive-strength = <4>;
+			mediatek,pull-up-adv = <1>;	/* pull-up 10K */
+		};
 	};
+
+	mmc0_pins_uhs: mmc0-uhs-pins {
+		mux {
+			function = "emmc";
+			groups = "emmc_51";
+		};
+
+		conf-cmd-dat {
+			pins = "EMMC_DATA_0", "EMMC_DATA_1", "EMMC_DATA_2",
+			       "EMMC_DATA_3", "EMMC_DATA_4", "EMMC_DATA_5",
+			       "EMMC_DATA_6", "EMMC_DATA_7", "EMMC_CMD";
+			input-enable;
+			drive-strength = <4>;
+			mediatek,pull-up-adv = <1>;	/* pull-up 10K */
+		};
+
+		conf-clk {
+			pins = "EMMC_CK";
+			drive-strength = <6>;
+			mediatek,pull-down-adv = <2>;	/* pull-down 50K */
+		};
+
+		conf-ds {
+			pins = "EMMC_DSL";
+			mediatek,pull-down-adv = <2>;	/* pull-down 50K */
+		};
+
+		conf-rst {
+			pins = "EMMC_RSTB";
+			drive-strength = <4>;
+			mediatek,pull-up-adv = <1>;	/* pull-up 10K */
+		};
+	};
+
+	pcie_pins: pcie-pins {
+		mux {
+			function = "pcie";
+			groups = "pcie_pereset";
+		};
+	};
+};
+
+&ssusb {
+	vusb33-supply = <&reg_3p3v>;
+	vbus-supply = <&usb_vbus>;
+	status = "okay";
 };
 
 &pcie {
@@ -133,53 +352,32 @@ cat << 'EOF' > target/linux/mediatek/files-6.6/arch/arm64/boot/dts/mediatek/mt79
 	status = "okay";
 };
 
-&pcie_phy { status = "okay"; };
-&uart0 { status = "okay"; };
-&usb_phy { status = "okay"; };
-
-&ssusb {
-	vusb33-supply = <&reg_3p3v>;
-	vbus-supply = <&usb_vbus>;
+&usb_phy {
 	status = "okay";
 };
 
-&wifi { status = "disabled"; };
-
-&eth {
+&pcie_phy {
 	status = "okay";
-	gmac0: mac@0 {
-		compatible = "mediatek,eth-mac";
-		reg = <0>;
-		phy-mode = "2500base-x";
-		fixed-link { speed = <2500>; full-duplex; pause; };
-	};
-	mdio: mdio-bus {
-		#address-cells = <1>;
-		#size-cells = <0>;
-		switch@31 {
-			compatible = "mediatek,mt7531";
-			reg = <31>;
-			reset-gpios = <&pio 5 GPIO_ACTIVE_HIGH>;
-			interrupt-controller;
-			#interrupt-cells = <1>;
-			interrupt-parent = <&pio>;
-			interrupts = <66 IRQ_TYPE_LEVEL_HIGH>;
-			ports {
-				#address-cells = <1>;
-				#size-cells = <0>;
-				port@0 { reg = <0>; label = "wan"; };
-				port@1 { reg = <1>; label = "lan4"; };
-				port@2 { reg = <2>; label = "lan3"; };
-				port@3 { reg = <3>; label = "lan2"; };
-				port@4 { reg = <4>; label = "lan1"; };
-				port@6 {
-					reg = <6>; label = "cpu"; ethernet = <&gmac0>;
-					phy-mode = "2500base-x";
-					fixed-link { speed = <2500>; full-duplex; pause; };
-				};
-			};
-		};
-	};
+};
+
+&crypto {
+	status = "okay";
+};
+
+&trng {
+	status = "okay";
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&watchdog {
+	status = "okay";
+};
+
+&wifi {
+	status = "disabled";
 };
 EOF
 
@@ -196,9 +394,12 @@ define Device/clx_s20m
   DEVICE_VENDOR := CLX
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
-  DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-nvme kmod-crypto-hw-safexcel block-mount automount kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3 zram-swap
-  IMAGES := sysupgrade.itb
+  DEVICE_PACKAGES := \
+    kmod-usb3 kmod-usb-xhci-mtk \
+    kmod-nvme \
+    kmod-crypto-mtk \
+    block-mount automount \
+    kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3 \
 endef
 TARGET_DEVICES += clx_s20m
 EOF

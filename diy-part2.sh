@@ -418,7 +418,7 @@ echo "正在配置 .config，移除 WiFi 相关包..."
 # 确保 .config 文件存在（通常已经由 cp 命令生成）
 if [ -f .config ]; then
     # 要移除的包列表（开源 WiFi 驱动 + 无线工具）
-    REMOVE_PKGS="-kmod-mt76 -kmod-mt76-connac -kmod-mt76-core -kmod-mt7915e -kmod-mt7915-firmware -kmod-mt7916-firmware -kmod-mt7986-firmware -mt7986-wo-firmware -wireless-tools -wifi-scripts -iwinfo"
+    REMOVE_PKGS="-kmod-mt76 -kmod-mt76-connac -kmod-mt76-core -kmod-mt7915e -kmod-mt7915-firmware -kmod-mt7916-firmware -kmod-mt7986-firmware -mt7986-wo-firmware -wpad-openssl -wireless-tools -wifi-scripts -iwinfo"
 
     # 删除可能存在的旧行
     sed -i '/CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_clx_s20m=/d' .config

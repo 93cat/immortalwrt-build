@@ -5,9 +5,8 @@ on:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
-  # 优化 2：锁定使用 Linux 6.6 内核的稳定分支，完美匹配我们的 DTS，拒绝 master 的不稳定
-  REPO_BRANCH: openwrt-24.10
+  REPO_URL: https://github.com/padavanonly/immortalwrt-mt798x-6.6
+  REPO_BRANCH: openwrt-24.10-6.6
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: s20m.config
   DIY_P1_SH: diy-part1.sh
@@ -46,7 +45,7 @@ jobs:
     - name: 加载自定义 Feeds (diy-part1.sh)
       run: |
         [ -e $FEEDS_CONF ] && cp $FEEDS_CONF openwrt/feeds.conf.default
-        # 优化 4：防呆设计，如果用户忘了建脚本，自动创建一个空脚本兜底
+        # 优化 ：防呆设计，如果用户忘了建脚本，自动创建一个空脚本兜底
         [ ! -f $DIY_P1_SH ] && touch $DIY_P1_SH
         chmod +x $DIY_P1_SH
         cd openwrt
@@ -60,9 +59,9 @@ jobs:
 
     - name: 加载配置文件与自定义脚本 (diy-part2.sh)
       run: |
-        # 优化 1：使用 cp 代替 mv，保证原始仓库文件不受损
+        # 优化 ：使用 cp 代替 mv，保证原始仓库文件不受损
         [ -e $CONFIG_FILE ] && cp $CONFIG_FILE openwrt/.config
-        # 优化 4：防呆设计
+        # 优化 ：防呆设计
         [ ! -f $DIY_P2_SH ] && touch $DIY_P2_SH
         chmod +x $DIY_P2_SH
         cd openwrt

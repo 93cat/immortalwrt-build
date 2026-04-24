@@ -469,6 +469,9 @@ sed -i 's/^CONFIG_KERNEL_DEBUG_INFO=y/# CONFIG_KERNEL_DEBUG_INFO is not set/' .c
 sed -i 's/^CONFIG_KERNEL_DEBUG_INFO_REDUCED=y/# CONFIG_KERNEL_DEBUG_INFO_REDUCED is not set/' .config
 sed -i 's/^CONFIG_KERNEL_DEBUG_FS=y/# CONFIG_KERNEL_DEBUG_FS is not set/' .config
 sed -i 's/^CONFIG_KERNEL_MAGIC_SYSRQ=y/# CONFIG_KERNEL_MAGIC_SYSRQ is not set/' .config
+#添加mmc-utils
+sed -i '/CONFIG_PACKAGE_mmc-utils/d' .config
+echo "CONFIG_PACKAGE_mmc-utils=y" >> .config
 
 # =========================================================
 # 3. 重新生成完整配置（重要！）

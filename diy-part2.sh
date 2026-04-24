@@ -394,12 +394,14 @@ define Device/clx_s20m
   DEVICE_VENDOR := CLX
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
+  DEVICE_DTS_DIR := ../dts
   DEVICE_PACKAGES := \
     kmod-usb3 kmod-usb-xhci-mtk \
     kmod-nvme \
     kmod-crypto-mtk \
     block-mount automount \
-    kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3 \
+    kmod-fs-ext4 kmod-fs-f2fs kmod-fs-exfat kmod-fs-ntfs3
+  IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += clx_s20m
 EOF

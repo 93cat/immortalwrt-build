@@ -445,9 +445,9 @@ rm -rf package/network/utils/iw
 rm -rf package/network/config/wifi-scripts
 # rm -rf package/network/utils/iwinfo 删除会出错
 #删除conninfra，删除就出错？
-#rm -rf package/mtk/drivers/conninfra
-#sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
-#sed -i '/CONFIG_MTK_CONNINFRA/d' .config
+rm -rf package/mtk/drivers/conninfra
+sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
+sed -i '/CONFIG_MTK_CONNINFRA/d' .config
 
 # 清理 .config 中所有 WiFi 相关配置项（包括依赖）
 sed -i '/CONFIG_PACKAGE_kmod-mt76/d' .config

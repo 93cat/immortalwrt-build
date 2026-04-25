@@ -1,4 +1,4 @@
-name: Build ImmortalWrt (S20M)
+name: Build ImmortalWrt (S20M)-237
 
 on:
   repository_dispatch:

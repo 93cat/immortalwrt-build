@@ -423,6 +423,85 @@ sed -i '/CONFIG_PACKAGE_mmc-utils/d' .config
 echo "CONFIG_PACKAGE_mmc-utils=y" >> .config
 
 # =========================================================
+# 彻底移除无线驱动及相关组件（基于官方 immortalwrt 源码）
+# 保留 PCIe 总线以支持 NVMe 硬盘
+# 开启标准硬件加速（flow offload）
+# =========================================================
+echo "正在配置无 WiFi 环境..."
+
+# 1. 确保 .config 文件存在
+if [ ! -f .config ]; then
+    echo "错误：.config 不存在，请先执行 make defconfig"
+    exit 1
+fi
+
+# 2. 禁用内核中的无线配置选项（如果有）
+echo "禁用内核无线选项..."
+sed -i '/CONFIG_WIRELESS_EXT=y/d' .config
+sed -i '/CONFIG_CFG80211=y/d' .config
+sed -i '/CONFIG_MAC80211=y/d' .config
+
+# 3. 移除所有 WiFi 相关的软件包配置
+echo "移除无线驱动包..."
+sed -i '/CONFIG_PACKAGE_kmod-mt76/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-mt7915/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-mt7986/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-mt_wifi/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-warp/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
+sed -i '/CONFIG_PACKAGE_wpad/d' .config
+sed -i '/CONFIG_PACKAGE_hostapd/d' .config
+sed -i '/CONFIG_PACKAGE_iw/d' .config
+sed -i '/CONFIG_PACKAGE_wireless-tools/d' .config
+sed -i '/CONFIG_PACKAGE_wifi-scripts/d' .config
+sed -i '/CONFIG_PACKAGE_iwinfo/d' .config
+sed -i '/CONFIG_PACKAGE_wireless-regdb/d' .config
+
+# 4. 明确禁用这些包（防止 defconfig 重新启用）
+echo "# CONFIG_PACKAGE_kmod-mt76 is not set" >> .config
+echo "# CONFIG_PACKAGE_kmod-mt7915e is not set" >> .config
+echo "# CONFIG_PACKAGE_kmod-mt7986-firmware is not set" >> .config
+echo "# CONFIG_PACKAGE_wpad-openssl is not set" >> .config
+echo "# CONFIG_PACKAGE_hostapd-common is not set" >> .config
+echo "# CONFIG_PACKAGE_iw is not set" >> .config
+echo "# CONFIG_PACKAGE_wireless-tools is not set" >> .config
+echo "# CONFIG_PACKAGE_wifi-scripts is not set" >> .config
+echo "# CONFIG_PACKAGE_iwinfo is not set" >> .config
+echo "# CONFIG_PACKAGE_wireless-regdb is not set" >> .config
+
+# 5. 删除无线驱动源码（确保彻底不编译）
+echo "删除无线驱动源码目录..."
+rm -rf package/kernel/mt76
+rm -rf package/kernel/mt_wifi
+rm -rf package/mtk/drivers/mt_wifi
+rm -rf package/mtk/drivers/warp
+# 注意：不要删除 package/network/utils/iwinfo，否则 rpcd 会编译失败
+
+# 6. 开启标准硬件加速（flow offload），替代私有 hnat 驱动
+echo "开启标准硬件加速..."
+echo "CONFIG_NFT_FLOW_OFFLOAD=y" >> .config
+echo "CONFIG_NFT_FLOW_OFFLOAD_HW=y" >> .config
+echo "CONFIG_NF_FLOW_TABLE=y" >> .config
+
+# 7. 预置防火墙开启硬件分载（可选，也可手动勾选）
+mkdir -p package/base-files/files/etc/config
+if ! grep -q "flow_offloading_hw" package/base-files/files/etc/config/firewall 2>/dev/null; then
+    cat << 'FIREWALL_EOF' >> package/base-files/files/etc/config/firewall
+
+config defaults
+        option flow_offloading '1'
+        option flow_offloading_hw '1'
+FIREWALL_EOF
+fi
+
+# 8. 重新生成配置（重要）
+echo "重新生成最终配置..."
+make defconfig
+
+echo "无线驱动已彻底移除，硬件加速已启用（标准 flow offload）"
+echo "注意：PCIe 总线已保留，NVMe 硬盘可正常使用"
+
+# =========================================================
 # 3. 重新生成完整配置（重要！）
 # =========================================================
 echo "正在重新生成配置（make defconfig）..."

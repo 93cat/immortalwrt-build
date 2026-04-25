@@ -466,6 +466,23 @@ sed -i '/CONFIG_MTK_WARP/d' .config
 echo "CONFIG_BLK_DEV_LOOP=y" >> .config
 echo "CONFIG_F2FS_FS=y" >> .config
 
+# 禁用无线用户态工具
+sed -i '/CONFIG_PACKAGE_wireless-regdb/d' .config
+sed -i '/CONFIG_PACKAGE_wireless-tools/d' .config
+sed -i '/CONFIG_PACKAGE_iwinfo/d' .config
+sed -i '/CONFIG_PACKAGE_rpcd-mod-iwinfo/d' .config
+
+echo "# CONFIG_PACKAGE_wireless-regdb is not set" >> .config
+echo "# CONFIG_PACKAGE_wireless-tools is not set" >> .config
+echo "# CONFIG_PACKAGE_iwinfo is not set" >> .config
+echo "# CONFIG_PACKAGE_rpcd-mod-iwinfo is not set" >> .config
+
+# 移除 ZRam 相关包
+sed -i '/CONFIG_PACKAGE_zram-swap/d' .config
+sed -i '/CONFIG_PACKAGE_kmod-zram/d' .config
+echo "# CONFIG_PACKAGE_zram-swap is not set" >> .config
+echo "# CONFIG_PACKAGE_kmod-zram is not set" >> .config
+
 # =========================================================
 # 2. 关闭内核调试选项（减小体积，提升性能）
 # =========================================================

@@ -395,7 +395,7 @@ define Device/clx_s20m
   DEVICE_MODEL := S20M
   DEVICE_DTS := mt7986a-clx-s20m
   DEVICE_DTS_DIR := ../dts
-  DEVICE_PACKAGES := DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-mmc kmod-nvme kmod-crypto-mtk kmod-fs-ext4 kmod-fs-exfat kmod-fs-ntfs3 kmod-fs-f2fs kmod-fs-vfat block-mount f2fs-tools f2fsck mkf2fs e2fsprogs blkid blockdev -kmod-mt76 -kmod-mt76-connac -kmod-mt76-core -kmod-mt7915e -kmod-mt7915-firmware -kmod-mt7916-firmware -kmod-mt7986-firmware -mt7986-wo-firmware
+  DEVICE_PACKAGES := kmod-usb3 kmod-usb-xhci-mtk kmod-mmc kmod-nvme kmod-crypto-mtk kmod-fs-ext4 kmod-fs-exfat kmod-fs-ntfs3 kmod-fs-f2fs kmod-fs-vfat block-mount f2fs-tools f2fsck mkf2fs e2fsprogs blkid blockdev -kmod-mt76 -kmod-mt76-connac -kmod-mt76-core -kmod-mt7915e -kmod-mt7915-firmware -kmod-mt7916-firmware -kmod-mt7986-firmware -mt7986-wo-firmware
   IMAGE/sysupgrade.bin := sysupgrade-tar | append-metadata
 endef
 TARGET_DEVICES += clx_s20m

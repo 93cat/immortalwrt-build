@@ -92,9 +92,18 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
+        echo "当前固件目录: $PWD"
+        ls -la
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: 上传固件作为 Artifacts
+      uses: actions/upload-artifact@v4
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      with:
+        name: S20M-Firmware
+        path: ${{ env.FIRMWARE }}/*
 
     - name: 生成 Release 标签
       id: tag

@@ -410,6 +410,10 @@ else
   echo "警告：检测到 filogic.mk 中已存在 CLX S20M 配置，跳过追加以防止重复。"
 fi
 
+# 强制选中 clx_s20m 设备
+sed -i '/CONFIG_TARGET_mediatek_filogic_DEVICE_/d' .config
+echo "CONFIG_TARGET_mediatek_filogic_DEVICE_clx_s20m=y" >> .config
+
 # =========================================================
 # 6. 在 .config 中显式移除 WiFi 驱动及无线工具（确保纯有线网关无残留）
 # =========================================================

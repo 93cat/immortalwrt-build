@@ -438,7 +438,7 @@ echo "正在移除 WiFi 相关源码和配置..."
 
 # 删除 WiFi 驱动源码（内核模块）
 rm -rf package/kernel/mt76
-rm -rf package/kernel/mt_wifi
+#rm -rf package/kernel/mt_wifi
 # 不要删除以下用户态工具的源码，仅通过 .config 排除打包
 # rm -rf package/network/services/hostapd
 # rm -rf package/network/utils/iw

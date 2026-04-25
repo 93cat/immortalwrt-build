@@ -449,10 +449,10 @@ rm -rf package/network/utils/iw
 rm -rf package/network/utils/wireless-tools
 rm -rf package/network/config/wifi-scripts
 # rm -rf package/network/utils/iwinfo
-#删除conninfra
-rm -rf package/mtk/drivers/conninfra
-sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
-sed -i '/CONFIG_MTK_CONNINFRA/d' .config
+#删除conninfra，删除就出错！
+#rm -rf package/mtk/drivers/conninfra
+#sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
+#sed -i '/CONFIG_MTK_CONNINFRA/d' .config
 
 # 清理 .config 中所有 WiFi 相关配置项（包括依赖）
 sed -i '/CONFIG_PACKAGE_kmod-mt76/d' .config
@@ -468,6 +468,8 @@ sed -i '/CONFIG_PACKAGE_wifi-scripts/d' .config
 sed -i '/CONFIG_PACKAGE_iwinfo/d' .config
 sed -i '/CONFIG_MTK_MT_WIFI/d' .config
 sed -i '/CONFIG_MTK_WARP/d' .config
+echo "CONFIG_BLK_DEV_LOOP=y" >> .config
+echo "CONFIG_F2FS_FS=y" >> .config
 
 # =========================================================
 # 2. 关闭内核调试选项（减小体积，提升性能）

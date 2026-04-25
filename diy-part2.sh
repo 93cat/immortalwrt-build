@@ -6,11 +6,11 @@
 echo "开始执行自定义脚本 (清理旧包 & 注入新包)..."
 
 # =========================================================
-# 1. 升级 Golang 到 1.26.x (适配最新 Sing-box)
+# 1. 升级 Golang 到 1.25.x (适配最新 Sing-box)
 # =========================================================
-echo "正在抹除旧版 Golang 并注入 Go 1.26.x 环境..."
+echo "正在抹除旧版 Golang 并注入 Go 1.25.x 环境..."
 rm -rf feeds/packages/lang/golang
-git clone https://github.com/kenzok8/golang -b 1.26 feeds/packages/lang/golang
+git clone https://github.com/kenzok8/golang -b 1.25 feeds/packages/lang/golang
 
 # =========================================================
 # 2. 暴力清理旧版 Passwall 及其核心依赖，彻底杜绝冲突！

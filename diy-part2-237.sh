@@ -446,10 +446,10 @@ rm -rf package/kernel/mt_wifi package/mtk/drivers/mt_wifi package/mtk/drivers/wa
 # 不要删除以下用户态工具的源码，仅通过 .config 排除打包
 rm -rf package/network/services/hostapd
 rm -rf package/network/utils/iw
-rm -rf package/network/utils/wireless-tools
+#rm -rf package/network/utils/wireless-tools 删除会出错
 rm -rf package/network/config/wifi-scripts
-# rm -rf package/network/utils/iwinfo
-#删除conninfra，删除就出错！
+# rm -rf package/network/utils/iwinfo 删除会出错
+#删除conninfra，删除就出错？
 #rm -rf package/mtk/drivers/conninfra
 #sed -i '/CONFIG_PACKAGE_kmod-conninfra/d' .config
 #sed -i '/CONFIG_MTK_CONNINFRA/d' .config
